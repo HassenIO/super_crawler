@@ -1,5 +1,3 @@
 require "super_crawler/version"
 
-module SuperCrawler
-  # Your code goes here...
-end
+require "super_crawler/crawl_page"
