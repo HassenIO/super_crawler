@@ -25,10 +25,10 @@ describe SuperCrawler::CrawlPage do
     let(:page_links) { page.get_links }
 
     it("should be an array") { expect(page_links).to be_a(Array) }
-    it("should detect unique internal links") { expect(page_links.count).to eq(4) }
+    it("should detect unique internal links") { expect(page_links.count).to eq(3) }
     it("shouldn't keep facebook.com") { expect(page_links.include?("http://facebook.com")).to eq(false) }
+    it("shouldn't keep subdomain link") { expect(page_links.include?("http://developers.example.com/")).to eq(false) }
     it("should convert all links to absolute path") { expect(page_links.include?("#{ex_url}/help")).to eq(true) }
-    it("should add subdomain link") { expect(page_links.include?("http://developers.example.com/")).to eq(true) }
   end
 
   describe "get_images" do

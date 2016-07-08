@@ -11,10 +11,7 @@ module SuperCrawler
 
     attr_reader :url
 
-    def initialize url, options = {}
-      # List of options:
-      @options = options
-
+    def initialize url
       # Normalize the URL, by adding http(s) if not present in the URL
       # NOTA: By default, add http:// scheme to an URL that doesn't have one
       @url = URI.encode( !!(url =~ /^(http(s)?:\/\/)/) ? url : ('http://' + url) )
@@ -24,11 +21,13 @@ module SuperCrawler
     # Get INTERNAL links of the page (same host)
     #
     def get_links
+      return [] unless page_exists?
+
       # Get all the links that are within <a> tag, using Nokogiri
       links = get_doc.css('a').map{ |link| link['href'] }.compact
 
       # Select only internal links (relative links, or absolute links with the same host)
-      links.select!{ |link| URI.parse(link).host.nil? || URI.parse(link).host.end_with?( URI.parse(@url).host ) }
+      links.select!{ |link| URI.parse(URI.encode link).host.nil? || URI.parse(URI.encode link).host == URI.parse(@url).host }
 
       # Reject bad matches links (like mailto, tel and javascript)
       links.reject!{ |link| !!(link =~ /^(mailto:|tel:|javascript:)/) }
@@ -36,7 +35,7 @@ module SuperCrawler
       # Clean the links
       links.map!{ |link| create_absolute_url( link ) } # Make all links absolute
            .map!{ |link| link.split('#')[0] } # Remove the fragment part from the links (...#...) if any
-           .map!{ |link| URI(link).normalize().to_s } # Normalize links
+           .map!{ |link| URI(URI.encode link).normalize().to_s } # Normalize links
 
       return links.uniq # Return links without duplicates
     end
@@ -46,6 +45,8 @@ module SuperCrawler
     # NOTA: These are images within <img src="..." /> tag.
     #
     def get_images
+      return [] unless page_exists?
+
       # Get all the images sources (URLs), using Nokogiri
       images_links = get_doc.css('img').map{ |image| image['src'] }.compact
 
@@ -60,6 +61,8 @@ module SuperCrawler
     # NOTA: These are links within <link href="..." /> tag.
     #
     def get_stylesheets
+      return [] unless page_exists?
+
       # Get all the stylesheet links (URLs), using Nokogiri
       css_links = get_doc.css('link').select{ |css_link| css_link['rel'] == 'stylesheet' }
                                      .map{ |css_link| css_link['href'] }
@@ -73,9 +76,11 @@ module SuperCrawler
 
     ###
     # Get all the JS scripts within a page
-    # NOTA: These are scripts within <script src="..." /> tag.
+      # NOTA: These are scripts within <script src="..." /> tag.
     #
     def get_scripts
+      return [] unless page_exists?
+
       # Get all the script sources (URLs), using Nokogiri
       scripts_links = get_doc.css('script').map{ |script| script['src'] }.compact
 
@@ -110,6 +115,13 @@ module SuperCrawler
       }
     end
 
+    ###
+    # Check if the page exists
+    #
+    def page_exists?
+      !!( get_doc rescue false )
+    end
+
     private
 
     ###
@@ -118,7 +130,7 @@ module SuperCrawler
     #
     def get_doc
       begin
-        @doc ||= Nokogiri(open(@url, allow_redirections: :all))
+        @doc ||= Nokogiri(open( @url , allow_redirections: :all ))
       rescue Exception => e
         raise "Problem with URL #{@url}: #{e}"
       end
@@ -139,7 +151,7 @@ module SuperCrawler
     #
     def create_absolute_url url
       # Append the base URL (scheme+host) if the provided URL is relative
-      URI.parse(URI.encode url).host.nil? ? URI.join(base_url, url).to_s : url
+      URI.parse(URI.encode url).host.nil? ? (base_url + url) : url
     end
 
   end
