@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Hassen Taidirt"]
   spec.email         = ["htaidirt@gmail.com"]
 
-  spec.summary       = %q{Crawl a page or a website.}
-  spec.description   = %q{SuperCrawler allows you to easily crawl page (or website) content and extract information.}
+  spec.summary       = %q{Easy (yet efficient) ruby gem to crawl your favorite website.}
+  spec.description   = %q{SuperCrawler allows you to easily crawl page (or website) content and extract information (internal links and assets).}
   spec.homepage      = "https://github.com:htaidirt/super_crawler.git"
   spec.license       = "MIT"
 

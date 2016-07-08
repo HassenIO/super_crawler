@@ -29,16 +29,8 @@ $ ./bin/console
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'super_crawler'
+gem 'super_crawler', git: 'git://github.com/htaidirt/super_crawler.git'
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install super_crawler
 
 Want to experiment with the gem without installing it? Clone the following repo and run `bin/console` for an interactive prompt that will allow you to experiment.
 
