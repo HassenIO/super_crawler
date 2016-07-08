@@ -101,9 +101,9 @@ page.get_links
 
 to get a list of internal links within the crawled page. An internal link is a link that _has the same host than the page URL_. Subdomains are rejected.
 
-This method search in the `href` attribute of all `<a>` anchor tags.
+This method searches in the `href` attribute of all `<a>` anchor tags.
 
-**Nota:** This methods returns an array of absolute URLs (all internal links).
+**Nota:** This method returns an array of absolute URLs (all internal links).
 
 **Nota 2:** Bad links and special links (like mailto and javascript) are discarded.
 
@@ -184,6 +184,35 @@ sc.links # The array of internal links
 
 sc.crawl_results # Array of hashes containing links and assets for every link crawled
 ```
+
+To see the crawling as a sitemap, use:
+
+```ruby
+sc.render(5) # Will render the sitemap of the first 5 pages
+```
+
+TODO: Make more sophisticated rendering class, that can render within files of different formats (HTML, XML, JSON,...)
+
+#### Tips on searching assets and links
+
+After `sc.start`, you can access all collected resources (links and assets) using `sc.crawl_results`. This has the following structure:
+
+```json
+[
+  {
+    url: 'http://example.com/',
+    links: [...array of internal links...],
+    assets: {
+      images: [...array of images links],
+      stylesheets: [...array of stylesheets links],
+      scripts: [...array of scripts links],
+    }
+  },
+  ...
+]
+```
+
+You can use `sc.crawl_results.select{ |resource| ... }` to select a particular resource.
 
 ## Limitations
 
