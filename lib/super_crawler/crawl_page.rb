@@ -6,6 +6,7 @@ module SuperCrawler
 
   ###
   # Crawl a single HTML page
+  # Responsible for extracting all relevant information within a page
   #
   class CrawlPage
 

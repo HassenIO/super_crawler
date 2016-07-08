@@ -1,6 +1,28 @@
 # SuperCrawler
 
-Easy (yet efficient) ruby gem to crawl a web site.
+Easy (yet efficient) ruby gem to crawl your favorite website.
+
+## Quick Start
+
+Open your terminal, then:
+
+```bash
+$ git clone https://github.com/htaidirt/super_crawler
+
+$ cd super_crawler
+
+$ bundle
+
+$ ./bin/console
+```
+
+```ruby
+ > sc = SuperCrawler::CrawlSite.new('https://gocardless.com')
+
+ > sc.start # => Start crawling the website
+
+ > sc.render(5) # => Show first 5 results of the crawling as sitemap
+```
 
 ## Installation
 
@@ -20,31 +42,24 @@ Or install it yourself as:
 
 Want to experiment with the gem without installing it? Clone the following repo and run `bin/console` for an interactive prompt that will allow you to experiment.
 
-## Quick Start
-
-Open your terminal, then:
-
-```bash
-$ git clone https://github.com/htaidirt/super_crawler
-
-$ cd super_crawler
-
-$ bundle
-
-$ ./bin/console
-```
-
-```ruby
-sc = SuperCrawler::CrawlSite.new('https://gocardless.com')
-
-sc.links.count # => How many links crawled
-```
-
 ## Warning!
 
 This gem is an experiment and can't be used for production purposes. Please, use it with caution if you want to use it in your projects.
 
 There are also a lot of limitations that weren't handled due to time. You'll find more information on the limitations below.
+
+SuperCrawler gem was only tested on MRI and ruby 2.3.1.
+
+## Philosophy
+
+Starting from a URL, extract all the internal links and assets within the page. Add all unique links to an array for future exploration of theses links. Repeat for each link in the links list until no new link is discovered.
+
+Due to the heavy operations, and the time to access each page content, we will use threads to perform near-parallel processing.
+
+In order to keep the code readable and structured, create two classes:
+
+- `SuperCrawler::CrawlPage` that is responsible for crawling a single page and extracting all relevant information (internal links and assets)
+- `SuperCrawler::CrawlSite` that is responsible for crawling a whole website, by collecting links and calling `SuperCrawler::CrawlPage` within threads. This class is also responsible for rendering results.
 
 ## More detailed usage
 
@@ -146,6 +161,42 @@ to get a list of all assets (images, stylesheets and scripts links) as a hash of
 
 ### Crawling a whole web site
 
+First instantiate the site crawler.
+
+```ruby
+sc = SuperCrawler::CrawlSite.new(url, count_threads)
+```
+
+where `url` is the URL of the page to crawl, and `count_threads` the number of threads to handle the job (by default 10).
+
+Next, start the crawler:
+
+```ruby
+sc.start
+```
+
+This can take some time, depending on the site to crawl.
+
+To access crawl results, you can use the following:
+
+```ruby
+sc.links # The array of internal links
+
+sc.crawl_results # Array of hashes containing links and assets for every link crawled
+```
+
+## Limitations
+
+Actually, the gem has the following limitations:
+
+- Subdomains are not considered as internal links
+- Both HTTP and HTTPS pages are taken into account. This can increase the number of links found, but we think that we need to keep it because some sites don't duplicate all contents for HTTP and HTTPS
+- Only links within `<a href="...">` tags are extracted
+- Only images links within `<img src="..."/>` tags are extracted
+- Only stylesheets links within `<link rel="stylesheet" href="..." />` tags are extracted
+- Only scripts links within `<script src="...">` tags are extracted
+- A page that is not accessible (eg. error 404) is not checked later
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -156,7 +207,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/htaidirt/super_crawler. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
-
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+## ... and never forget to have fun coding Ruby...
