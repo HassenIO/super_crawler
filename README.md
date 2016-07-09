@@ -29,7 +29,19 @@ $ ./bin/console
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'super_crawler', git: 'git://github.com/htaidirt/super_crawler.git'
+gem 'super_crawler'
+```
+
+And then execute:
+
+```ruby
+bundle install
+```
+
+Or install it yourself as:
+
+```ruby
+gem install super_crawler
 ```
 
 Want to experiment with the gem without installing it? Clone the following repo and run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -53,7 +65,7 @@ In order to keep the code readable and structured, create two classes:
 - `SuperCrawler::CrawlPage` that is responsible for crawling a single page and extracting all relevant information (internal links and assets)
 - `SuperCrawler::CrawlSite` that is responsible for crawling a whole website, by collecting links and calling `SuperCrawler::CrawlPage` within threads. This class is also responsible for rendering results.
 
-## More detailed usage
+## More detailed use
 
 Open your favorite ruby console and require the gem:
 
@@ -228,8 +240,16 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/htaidirt/super_crawler. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
+Want to contribute, please follow this process:
+
+1. Fork it
+2. Create your feature branch (git checkout -b my-new-feature)
+3. Commit your changes (git commit -am 'Add some feature')
+4. Push to the branch (git push origin my-new-feature)
+5. Create new Pull Request
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
-## ... and never forget to have fun coding Ruby...
+## Don't forget to have fun coding Ruby...

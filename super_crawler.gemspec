@@ -10,14 +10,14 @@ Gem::Specification.new do |spec|
   spec.email         = ["htaidirt@gmail.com"]
 
   spec.summary       = %q{Easy (yet efficient) ruby gem to crawl your favorite website.}
-  spec.description   = %q{SuperCrawler allows you to easily crawl page (or website) content and extract information (internal links and assets).}
-  spec.homepage      = "https://github.com:htaidirt/super_crawler.git"
+  spec.description   = %q{SuperCrawler allows you to easily crawl full web sites or web pages (extracting internal links and assets) in few seconds.}
+  spec.homepage      = "https://github.com/htaidirt/super_crawler"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
+    spec.metadata['allowed_push_host'] = "https://rubygems.org"
   else
     raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
   end
@@ -28,8 +28,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "nokogiri", "~> 1"
-  spec.add_dependency "open_uri_redirections"
-  spec.add_dependency "thread"
+  spec.add_dependency "open_uri_redirections", "~> 0.2"
+  spec.add_dependency "thread", "~> 0.2"
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
