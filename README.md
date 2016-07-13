@@ -6,23 +6,16 @@ Easy (yet efficient) ruby gem to crawl your favorite website.
 
 Open your terminal, then:
 
-```bash
-$ git clone https://github.com/htaidirt/super_crawler
+    git clone https://github.com/htaidirt/super_crawler
+    cd super_crawler
+    bundle
+    ./bin/console
 
-$ cd super_crawler
+Then
 
-$ bundle
-
-$ ./bin/console
-```
-
-```ruby
- > sc = SuperCrawler::CrawlSite.new('https://gocardless.com')
-
- > sc.start # => Start crawling the website
-
- > sc.render(5) # => Show first 5 results of the crawling as sitemap
-```
+    sc = SuperCrawler::Crawl.new('https://gocardless.com')
+    sc.start(10) # => Start crawling the website using 10 threads
+    sc.render(5) # => Show the first 5 results of the crawling as sitemap
 
 ## Installation
 
@@ -52,64 +45,57 @@ This gem is an experiment and can't be used for production purposes. Please, use
 
 There are also a lot of limitations that weren't handled due to time. You'll find more information on the limitations below.
 
-SuperCrawler gem was only tested on MRI and ruby 2.3.1.
+SuperCrawler gem was only tested on MRI 2.3.1 and Rubinius 2.5.8.
 
 ## Philosophy
 
-Starting from a URL, extract all the internal links and assets within the page. Add all unique links to an array for future exploration of theses links. Repeat for each link in the links list until no new link is discovered.
+Starting from a given URL, the crawler extracts all the internal links and assets within the page. The links are added to a list of unique links for further exploration. The crawler repeats the exploration visiting all the links until no new link is found.
 
-Due to the heavy operations, and the time to access each page content, we will use threads to perform near-parallel processing.
+Due to the heavy operations (thousands of pages), and the network time to access each page content, we will use threads to perform near-parallel processing.
 
-In order to keep the code readable and structured, create two classes:
+In order to keep the code readable and structured, we created two classes:
 
-- `SuperCrawler::CrawlPage` that is responsible for crawling a single page and extracting all relevant information (internal links and assets)
-- `SuperCrawler::CrawlSite` that is responsible for crawling a whole website, by collecting links and calling `SuperCrawler::CrawlPage` within threads. This class is also responsible for rendering results.
+- `SuperCrawler::Scrap` is responsible for scrapping a single page and extracting all relevant information (internal links and assets)
+- `SuperCrawler::Crawl` is responsible for crawling a whole website by collecting and managing links (using `SuperCrawler::Scrap` on every internal link found.) This class is also responsible for rendering results.
 
 ## More detailed use
 
 Open your favorite ruby console and require the gem:
 
-```ruby
-require 'super_crawler'
-```
+    require 'super_crawler'
 
-### Crawling a single web page
+### Scrapping a single web page
 
 Read the following if you would like to crawl a single web page and extract relevant information (internal links and assets).
 
-```ruby
-page = SuperCrawler::CrawlPage.new( url )
-```
+    page = SuperCrawler::Scrap.new( url )
 
-Where `url` should be the URL of the page you would like to crawl.
+Where `url` should be the URL of the page you would like to scrap.
 
-**Nota:** When missing a scheme (`http://` or `https://`), SuperCrawler will prepend the URL with an `http://`.
+**Nota:** If the given URL has a missing scheme (`http://` or `https://`), SuperCrawler will prepend `http://` to the URL.
 
 #### Get the encoded URL
 
 Run
 
-```ruby
-page.url
-```
-
-to get the encoded URL provided.
+    page.url
+    
+to get the encoded URL.
 
 #### Get internal links of a page
 
 Run
 
-```ruby
-page.get_links
-```
-
-to get a list of internal links within the crawled page. An internal link is a link that _has the same host than the page URL_. Subdomains are rejected.
+    page.get_links
+    
+to get the list of internal links in the page. An internal link is a link that _has the same schame and host than the provided URL_. Subdomains are rejected.
 
 This method searches in the `href` attribute of all `<a>` anchor tags.
 
-**Nota:** This method returns an array of absolute URLs (all internal links).
+**Nota:**
 
-**Nota 2:** Bad links and special links (like mailto and javascript) are discarded.
+- This method returns an array of absolute URLs (all internal links).
+- Bad links and special links (like mailto and javascript) are discarded.
 
 #### Get images of a page
 
@@ -129,92 +115,75 @@ to get a list of images links within the page. The images links are extracted fr
 
 Run
 
-```ruby
-page.get_stylesheets
-```
+    page.get_stylesheets
 
-to get a list of stylesheets links within the page. The stylesheets links are extracted from the `href="..."` attribute of all `<link rel="stylesheet">` tags.
+to get a list of stylesheet links within the page. The links are extracted from the `href="..."` attribute of all `<link rel="stylesheet">` tags.
 
-**Nota:** Inline styling isn't yet detected by the method.
+**Nota:**
 
-**Nota 2:** This method returns an array of absolute URLs.
+- Inline styling isn't yet detected by the method.
+- This method returns an array of absolute URLs.
 
 #### Get scripts of a page
 
 Run
 
-```ruby
-page.get_scripts
-```
+    page.get_scripts
 
-to get a list of scripts links within the page. The scripts links are extracted from the `src="..."` attribute of all `<script>` tags.
+to get a list of script links within the page. The links are extracted from the `src="..."` attribute of all `<script>` tags.
 
-**Nota:** Inline script isn't yet detected by the method.
+**Nota:**
 
-**Nota 2:** This method returns an array of absolute URLs.
+- Inline script isn't yet detected by the method.
+- This method returns an array of absolute URLs.
 
 #### List all assets of a page
 
 Run
 
-```ruby
-page.get_assets
-```
+    page.get_assets
 
-to get a list of all assets (images, stylesheets and scripts links) as a hash of arrays.
+to get a list of all assets (links of images, stylesheets and scripts) as a hash of arrays.
 
 ### Crawling a whole web site
 
-First instantiate the site crawler.
+    sc = SuperCrawler::Crawl.new(url)
 
-```ruby
-sc = SuperCrawler::CrawlSite.new(url, count_threads)
-```
-
-where `url` is the URL of the page to crawl, and `count_threads` the number of threads to handle the job (by default 10).
+where `url` is the URL of the website to crawl.
 
 Next, start the crawler:
 
-```ruby
-sc.start
-```
+    sc.start(number_of_threads)
+    
+where `number_of_threads` is the number of threads that will perform the job (10 by default.) **This can take some time, depending on the site to crawl.**
 
-This can take some time, depending on the site to crawl.
+To access the crawl results, use the following:
 
-To access crawl results, you can use the following:
-
-```ruby
-sc.links # The array of internal links
-
-sc.crawl_results # Array of hashes containing links and assets for every link crawled
-```
+    sc.links # The array of unique internal links
+    sc.crawl_results # Array of hashes containing links and assets for every unique internal link found
 
 To see the crawling as a sitemap, use:
 
-```ruby
-sc.render(5) # Will render the sitemap of the first 5 pages
-```
+    sc.render(5) # Will render the sitemap of the first 5 pages
 
-TODO: Make more sophisticated rendering class, that can render within files of different formats (HTML, XML, JSON,...)
+_TODO: Create a separate and more sophisticated rendering class, that can render within files of different formats (HTML, XML, JSON,...)_
 
 #### Tips on searching assets and links
 
 After `sc.start`, you can access all collected resources (links and assets) using `sc.crawl_results`. This has the following structure:
 
-```json
-[
-  {
-    url: 'http://example.com/',
-    links: [...array of internal links...],
-    assets: {
-      images: [...array of images links],
-      stylesheets: [...array of stylesheets links],
-      scripts: [...array of scripts links],
-    }
-  },
-  ...
-]
-```
+    [
+      {
+        url: 'http://example.com/',
+        links: [...array of internal links...],
+        assets: {
+          images: [...array of images links],
+          stylesheets: [...array of stylesheets links],
+          scripts: [...array of scripts links],
+        }
+      },
+      ...
+    ]
 
 You can use `sc.crawl_results.select{ |resource| ... }` to select a particular resource.
 
@@ -223,12 +192,12 @@ You can use `sc.crawl_results.select{ |resource| ... }` to select a particular r
 Actually, the gem has the following limitations:
 
 - Subdomains are not considered as internal links
-- Both HTTP and HTTPS pages are taken into account. This can increase the number of links found, but we think that we need to keep it because some sites don't duplicate all contents for HTTP and HTTPS
+- A link with the same domain but different scheme is ignored (http -> https, or the opposite)
 - Only links within `<a href="...">` tags are extracted
 - Only images links within `<img src="..."/>` tags are extracted
 - Only stylesheets links within `<link rel="stylesheet" href="..." />` tags are extracted
 - Only scripts links within `<script src="...">` tags are extracted
-- A page that is not accessible (eg. error 404) is not checked later
+- A page that is not accessible (not status 200) is not checked later
 
 ## Development
 
@@ -238,11 +207,11 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/htaidirt/super_crawler. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/htaidirt/super_crawler](https://github.com/htaidirt/super_crawler). This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
-Want to contribute, please follow this process:
+Please, follow this process:
 
-1. Fork it
+1. Fork the project
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)

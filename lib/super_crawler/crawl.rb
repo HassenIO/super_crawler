@@ -1,13 +1,13 @@
 require 'thread'
 
-require 'super_crawler/crawl_page'
+require 'super_crawler/scrap'
 
 module SuperCrawler
 
   ###
   # Crawl a whole website
   #
-  class CrawlSite
+  class Crawl
 
     attr_reader :links, :crawl_results
 
@@ -89,7 +89,7 @@ module SuperCrawler
     # Process a page by extracting information and updating links queue, links list and results.
     #
     def process_page page_url
-      page = SuperCrawler::CrawlPage.new(page_url) # Crawl the current page
+      page = SuperCrawler::Scrap.new(page_url) # Scrap the current page
 
       current_page_links = page.get_links # Get current page internal links
       new_links = current_page_links - @links # Select new links

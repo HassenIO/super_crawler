@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'super_crawler/crawl_page'
+require 'super_crawler/scrap'
 
-describe SuperCrawler::CrawlPage do
+describe SuperCrawler::Scrap do
 
   let(:ex_url)    { 'http://example.com' } # An example URL
   let(:html)      { File.read( File.expand_path('../../support/index.html', __FILE__) ) }
-  subject(:page)  { SuperCrawler::CrawlPage.new(ex_url) }
+  subject(:page)  { SuperCrawler::Scrap.new(ex_url) }
   before          { allow(page).to receive(:get_doc) { Nokogiri(html) } }
 
   it { expect(page).to respond_to(:url) }

@@ -1,4 +1,4 @@
 require "super_crawler/version"
 
-require "super_crawler/crawl_page"
-require "super_crawler/crawl_site"
+require "super_crawler/scrap"
+require "super_crawler/crawl"

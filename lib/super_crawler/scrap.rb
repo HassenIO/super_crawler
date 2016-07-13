@@ -4,10 +4,11 @@ require "nokogiri"
 module SuperCrawler
 
   ###
-  # Crawl a single HTML page
+  # Scrap a single HTML page
   # Responsible for extracting all relevant information within a page
+  # (internal links and assets)
   #
-  class CrawlPage
+  class Scrap
 
     attr_reader :url
 

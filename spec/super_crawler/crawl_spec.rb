@@ -1,10 +1,10 @@
 require 'spec_helper'
-require 'super_crawler/crawl_site'
+require 'super_crawler/crawl'
 
-describe SuperCrawler::CrawlSite do
+describe SuperCrawler::Crawl do
 
   let(:url)             { 'http://htaidirt.com' }
-  subject(:sc)          { SuperCrawler::CrawlSite.new(url, debug: true) }
+  subject(:sc)          { SuperCrawler::Crawl.new(url, debug: true) }
 
   describe "Crawling all http://htaidirt.com" do
     before { sc.start 10 }
