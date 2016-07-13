@@ -1,5 +1,4 @@
 require "open-uri"
-require "open_uri_redirections"
 require "nokogiri"
 
 module SuperCrawler
@@ -13,8 +12,7 @@ module SuperCrawler
     attr_reader :url
 
     def initialize url
-      # Normalize the URL, by adding http(s) if not present in the URL
-      # NOTA: By default, add http:// scheme to an URL that doesn't have one
+      # Normalize the URL, by adding a scheme (http) if not present in the URL
       @url = URI.encode( !!(url =~ /^(http(s)?:\/\/)/) ? url : ('http://' + url) )
     end
 
@@ -28,7 +26,7 @@ module SuperCrawler
       links = get_doc.css('a').map{ |link| link['href'] }.compact
 
       # Select only internal links (relative links, or absolute links with the same host)
-      links.select!{ |link| URI.parse(URI.encode link).host.nil? || URI.parse(URI.encode link).host == URI.parse(@url).host }
+      links.select!{ |link| URI.parse(URI.encode link).host.nil? || link.start_with?( @url ) }
 
       # Reject bad matches links (like mailto, tel and javascript)
       links.reject!{ |link| !!(link =~ /^(mailto:|tel:|javascript:)/) }
@@ -97,9 +95,9 @@ module SuperCrawler
     #
     def get_assets
       {
-        'images': get_images,
-        'stylesheets': get_stylesheets,
-        'scripts': get_scripts
+        :'images' => get_images,
+        :'stylesheets' => get_stylesheets,
+        :'scripts' => get_scripts
       }
     end
 
@@ -109,10 +107,10 @@ module SuperCrawler
     #
     def get_all
       {
-        'links': get_links,
-        'images': get_images,
-        'stylesheets': get_stylesheets,
-        'scripts': get_scripts
+        :'links' => get_links,
+        :'images' => get_images,
+        :'stylesheets' => get_stylesheets,
+        :'scripts' => get_scripts
       }
     end
 
@@ -131,20 +129,10 @@ module SuperCrawler
     #
     def get_doc
       begin
-        @doc ||= Nokogiri(open( @url , allow_redirections: :all ))
+        @doc ||= Nokogiri(open( @url ))
       rescue Exception => e
         raise "Problem with URL #{@url}: #{e}"
       end
-    end
-
-    ###
-    # Extract the base URL (scheme and host only)
-    #
-    # eg:
-    # http://mysite.com/abc -> http://mysite.com
-    # https://dev.mysite.co.uk/mylink -> https://dev.mysite.co.uk
-    def base_url
-      "#{URI.parse(@url).scheme}://#{URI.parse(@url).host}"
     end
 
     ###
@@ -152,7 +140,7 @@ module SuperCrawler
     #
     def create_absolute_url url
       # Append the base URL (scheme+host) if the provided URL is relative
-      URI.parse(URI.encode url).host.nil? ? (base_url + url) : url
+      URI.parse(URI.encode url).host.nil? ? "#{URI.parse(@url).scheme}://#{URI.parse(@url).host}#{url}" : url
     end
 
   end

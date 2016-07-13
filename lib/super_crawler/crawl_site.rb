@@ -11,23 +11,22 @@ module SuperCrawler
 
     attr_reader :links, :crawl_results
 
-    def initialize start_url, threads = 10, options = {}
+    def initialize start_url, options = {}
       @start_url = URI(URI.encode start_url).normalize().to_s # Normalize the given URL
       @links = [@start_url] # Will contain the list of all links found
       @crawl_results = [] # Will contain the crawl results (links and assets), as array of hashes
-      @threads = threads # How many threads to use? Default: 10
 
       @option_debug = options[:debug].nil? ? true : !!(options[:debug]) # Debug by default
     end
 
     ###
     # Start crawling site
-    # Could take a while. Use threads to speed up crawling and logging to inform user.
+    # Could take a while! Use threads to speed up crawling and log to inform user.
     #
-    def start
+    def start threads_count = 10
 
-      crawling_start_notice # Show message on what will happen
-      threads = [] # Will contain our threads
+      crawling_start_notice( @start_url, threads_count ) # Show message on what will happen
+      threads = [] # Will contain our n-threads
       @links_queue = Queue.new # Will contain the links queue that the threads will use
       @links = [@start_url] # Re-init the links list
       @crawl_results = [] # Re-init the crawling results
@@ -38,12 +37,12 @@ module SuperCrawler
       process_page( @start_url )
 
       # Create threads to handle new links
-      @threads.times do # Create many threads
+      threads_count.times do # Create threads_count threads
 
-        threads << Thread.new do # Add a new threads
+        threads << Thread.new do # Instantiate a new threads
           begin
-            while current_link = @links_queue.pop(true) # Popping every link after another
-              process_page( current_link ) # Get links and assets
+            while current_link = @links_queue.pop(true) # Pop one link after another
+              process_page( current_link ) # Get links and assets of the popped link
             end
           rescue ThreadError # Stop when empty links queue
           end
@@ -52,7 +51,7 @@ module SuperCrawler
       end
 
       threads.map(&:join) # Activate the threads
-      crawling_summary_notice(start_time, Time.now) if @option_debug # Display crawling summary
+      crawling_summary_notice(start_time, Time.now, threads_count) if @option_debug # Display crawling summary
 
       return true
     end
@@ -64,7 +63,7 @@ module SuperCrawler
     #
     def render max_pages = 10
       draw_line
-      puts "Showing first #{max_links} crawled pages and their contents:\n\n"
+      puts "Showing first #{max_pages} crawled pages and their contents:\n\n"
       @crawl_results[0..(max_pages-1)].each_with_index do |result, index|
         puts "[#{index+1}] Content of #{result[:url]}\n"
 
@@ -96,7 +95,7 @@ module SuperCrawler
       new_links = current_page_links - @links # Select new links
 
       new_links.each { |link| @links_queue.push(link) } # Add new links to the queue
-      @links += new_links # Add new links to the total links list
+      @links += new_links # Add new links to the links list
       @crawl_results << { # Provide current page crawl result as a hash
         url: page.url, # The crawled page
         links: current_page_links, # Its internal links
@@ -109,11 +108,11 @@ module SuperCrawler
     ###
     # Display a notice when starting a site crawl
     #
-    def crawling_start_notice
+    def crawling_start_notice start_url, threads
       draw_line
-      puts "Start crawling #{@start_url} using #{@threads} threads. Crawling rules:"
+      puts "Start crawling #{start_url} using #{threads} threads. Crawling rules:"
       puts "1. Keep only internal links"
-      puts "2. http and https links are considered different"
+      puts "2. Links with different scheme are agnored"
       puts "3. Remove the fragment part from the links (#...)"
       puts "4. Keep paths with different parameters (?...)"
       draw_line
@@ -132,11 +131,11 @@ module SuperCrawler
     ###
     # Display final crawling summary after site crawling complete
     #
-    def crawling_summary_notice time_start, time_end
+    def crawling_summary_notice time_start, time_end, threads
       total_time = time_end - time_start
       puts ""
       draw_line
-      puts "Crawled #{@links.count} links in #{total_time.to_f.to_s} seconds using #{@threads} threads."
+      puts "Crawled #{@links.count} links in #{total_time.to_f.to_s} seconds using #{threads} threads."
       puts "Use .crawl_results to access the crawl results as an array of hashes."
       puts "Use .render to see the crawl_results as a sitemap."
       draw_line
