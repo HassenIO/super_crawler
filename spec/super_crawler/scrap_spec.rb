@@ -21,48 +21,48 @@ describe SuperCrawler::Scrap do
 
   it { expect(page.url).to eq(ex_url) }
 
-  describe "get_links" do
+  describe "#get_links" do
     let(:page_links) { page.get_links }
 
-    it("should be an array") { expect(page_links).to be_a(Array) }
-    it("should detect unique internal links") { expect(page_links.count).to eq(3) }
-    it("shouldn't keep facebook.com") { expect(page_links.include?("http://facebook.com")).to eq(false) }
-    it("shouldn't keep subdomain link") { expect(page_links.include?("http://developers.example.com/")).to eq(false) }
-    it("should convert all links to absolute path") { expect(page_links.include?("#{ex_url}/help")).to eq(true) }
+    it("returns an array") { expect(page_links).to be_a(Array) }
+    it("detects unique internal links") { expect(page_links.count).to eq(3) }
+    it("doesn't keep facebook.com") { expect(page_links.include?("http://facebook.com")).to eq(false) }
+    it("doesn't keep subdomain link") { expect(page_links.include?("http://developers.example.com/")).to eq(false) }
+    it("converts all links to absolute path") { expect(page_links.include?("#{ex_url}/help")).to eq(true) }
   end
 
-  describe "get_images" do
+  describe "#get_images" do
     let(:page_images) { page.get_images }
 
-    it("should be an array") { expect(page_images).to be_a(Array) }
-    it("should detect only one image") { expect(page_images.count).to eq(1) }
-    it("should convert relative image path to absolute path") { expect(page_images.include?("#{ex_url}/logo.png")).to eq(true) }
+    it("returns an array") { expect(page_images).to be_a(Array) }
+    it("detects only one image") { expect(page_images.count).to eq(1) }
+    it("converts relative path to absolute path") { expect(page_images.include?("#{ex_url}/logo.png")).to eq(true) }
   end
 
-  describe "get_stylesheets" do
+  describe "#get_stylesheets" do
     let(:page_stylesheets) { page.get_stylesheets }
 
-    it("should be an array") { expect(page_stylesheets).to be_a(Array) }
-    it("should detect only one stylesheet") { expect(page_stylesheets.count).to eq(1) }
-    it("should convert relative stylesheet path to absolute path") { expect(page_stylesheets.include?("#{ex_url}/css/master.css")).to eq(true) }
+    it("returns an array") { expect(page_stylesheets).to be_a(Array) }
+    it("detects only one stylesheet") { expect(page_stylesheets.count).to eq(1) }
+    it("converts relative path to absolute path") { expect(page_stylesheets.include?("#{ex_url}/css/master.css")).to eq(true) }
   end
 
-  describe "get_scripts" do
+  describe "#get_scripts" do
     let(:page_scripts) { page.get_scripts }
 
-    it("should be an array") { expect(page_scripts).to be_a(Array) }
-    it("should detect only two scripts") { expect(page_scripts.count).to eq(2) }
-    it("should convert relative scripts path to absolute path") { expect(page_scripts.include?("#{ex_url}/js/jquery.min.js")).to eq(true) }
-    it("should keep external scripts") { expect(page_scripts.include?("http://google.com/analytics.js")).to eq(true) }
+    it("returns an array") { expect(page_scripts).to be_a(Array) }
+    it("detects only two scripts") { expect(page_scripts.count).to eq(2) }
+    it("converts relative path to absolute path") { expect(page_scripts.include?("#{ex_url}/js/jquery.min.js")).to eq(true) }
+    it("keeps external scripts") { expect(page_scripts.include?("http://google.com/analytics.js")).to eq(true) }
   end
 
-  describe "get_assets" do
+  describe "#get_assets" do
     let(:page_assets) { page.get_assets }
 
-    it("should be a hash") { expect(page_assets).to be_a(Hash) }
-    it("should have images") { expect(page_assets[:images]).to_not eq(nil) }
-    it("should have stylesheets") { expect(page_assets[:stylesheets]).to_not eq(nil) }
-    it("should have scripts") { expect(page_assets[:scripts]).to_not eq(nil) }
+    it("returns a hash") { expect(page_assets).to be_a(Hash) }
+    it("returns list of images") { expect(page_assets[:images]).to_not eq(nil) }
+    it("returns list of stylesheets") { expect(page_assets[:stylesheets]).to_not eq(nil) }
+    it("returns list of scripts") { expect(page_assets[:scripts]).to_not eq(nil) }
   end
 
 end

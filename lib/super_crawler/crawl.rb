@@ -27,7 +27,7 @@ module SuperCrawler
     #
     def start threads_count = 10
 
-      SuperCrawler::Render.crawling_start_notice( @start_url, threads_count ) # Show message on what will happen
+      SuperCrawler::Render.crawling_start_notice( @start_url, threads_count ) if @option_debug # Show message on what will happen
 
       threads = []              # Will contain our n-threads
       @links_queue = Queue.new  # Will contain the links queue that the threads will use
@@ -64,6 +64,23 @@ module SuperCrawler
     #
     def render max_pages = 10
       SuperCrawler::Render.console( @crawl_results, max_pages )
+    end
+
+    ###
+    # Get specific assets (images, stylesheets and scripts)
+    #
+    def get_assets asset
+      return [] if @crawl_results.empty? # No crawling yet? Return empty search
+
+      # The asset parameter can only be images, stylesheets or scripts
+      unless %w(images stylesheets scripts).include? asset.to_s
+        # Display error message in this case.
+        SuperCrawler::Render.error "`asset` parameter can only be `images`, `stylesheets` or `scripts`"
+        return [] # Return empty array
+      end
+
+      # Good! Return flatten array of unique assets
+      return @crawl_results.map{ |cr| cr[:assets][asset.to_sym] }.flatten.uniq
     end
 
     private

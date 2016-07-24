@@ -79,7 +79,7 @@ Where `url` should be the URL of the page you would like to scrap.
 Run
 
     page.url
-    
+
 to get the encoded URL.
 
 #### Get internal links of a page
@@ -87,7 +87,7 @@ to get the encoded URL.
 Run
 
     page.get_links
-    
+
 to get the list of internal links in the page. An internal link is a link that _has the same schame and host than the provided URL_. Subdomains are rejected.
 
 This method searches in the `href` attribute of all `<a>` anchor tags.
@@ -154,7 +154,7 @@ where `url` is the URL of the website to crawl.
 Next, start the crawler:
 
     sc.start(number_of_threads)
-    
+
 where `number_of_threads` is the number of threads that will perform the job (10 by default.) **This can take some time, depending on the site to crawl.**
 
 To access the crawl results, use the following:
@@ -166,7 +166,7 @@ To see the crawling as a sitemap, use:
 
     sc.render(5) # Will render the sitemap of the first 5 pages
 
-_TODO: Create a separate and more sophisticated rendering class, that can render within files of different formats (HTML, XML, JSON,...)_
+_TODO: Make more sophisticated rendering methods, that can render within files of different formats (HTML, XML, JSON,...)_
 
 #### Tips on searching assets and links
 
@@ -186,6 +186,21 @@ After `sc.start`, you can access all collected resources (links and assets) usin
     ]
 
 You can use `sc.crawl_results.select{ |resource| ... }` to select a particular resource.
+
+Example:
+
+    images = sc.crawl_results.map{ |page| page[:assets][:images] }.flatten.uniq
+    # => Returns an array of all unique images found during the crawling
+
+#### Get assets of a whole crawling
+
+You can collect in a single array any assets of a crawling, by using the following:
+
+    images      = sc.get_assets :images       # => Returns an array of unique images
+    stylesheets = sc.get_assets :stylesheets  # => Returns an array of unique stylesheets
+    scripts     = sc.get_assets :scripts      # => Returns an array of unique scripts
+
+It is important to note that all the given arrays contain unique absolute URLs. As said before, the assets are not necessarily internal assets.
 
 ## Limitations
 
