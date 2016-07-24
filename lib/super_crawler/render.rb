@@ -6,15 +6,22 @@ module SuperCrawler
   class Render
 
     ###
+    # Display error message in the console.
+    #
+    def self.error message
+      puts "\e[31m[ERROR]\e[0m #{message}"
+    end
+
+    ###
     # Display a notice when starting a site crawl
     #
     def self.crawling_start_notice start_url, threads
       self.draw_line
       puts "Start crawling #{start_url} using #{threads} threads. Crawling rules:"
-      puts "1. Keep only internal links"
-      puts "2. Links with different scheme are agnored"
-      puts "3. Remove the fragment part from the links (#...)"
-      puts "4. Keep paths with different parameters (?...)"
+      puts "1. Consider only links starting with #{start_url}"
+      puts "2. Remove the fragment part from the links (#...)"
+      puts "3. Keep paths with different parameters (?...)"
+      puts "4. Assets can be internal or external to the site"
       self.draw_line
     end
 
@@ -61,7 +68,7 @@ module SuperCrawler
     def self.crawling_summary_notice total_time, threads_count, links_count
       puts
       self.draw_line
-      puts "Crawled #{links_count} links in #{total_time.to_f.to_s} seconds using #{threads_count} threads."
+      puts "\e[33m[SUCCESS]\e[0m Crawled #{links_count} links in #{total_time.to_f.to_s} seconds using #{threads_count} threads."
       puts "Use .crawl_results to access the crawl results as an array of hashes."
       puts "Use .render to see the crawl_results as a sitemap."
       self.draw_line
